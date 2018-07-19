@@ -1,0 +1,27 @@
+#TODOLIST
+
+Create a GAN for the CIFAR-10 dataset.
+
+1. Read data and reformat in appropriate size ####
+	- Download data
+	- Visualize the images
+
+2. Build a simple tensorflow network ####
+	- One input layer, one convolutional (with strides), one fully connected output layer. 
+
+3. Build the discriminator ####
+	- Make a simple working discriminator first.
+
+4. Build the generator ####
+	- Make a simple generator first.
+
+5. Combine both of them ####
+	- Make it so both can run together.
+6. Make the discriminator more complex. ####
+7. Make the generator more complex. ####
+8. Done. ####
+
+File setup:
+- The models, discriminator and generator in one file.
+- Read data in one file.
+- Datasets in subfolder.
