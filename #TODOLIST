@@ -23,5 +23,6 @@ Create a GAN for the CIFAR-10 dataset.
 
 File setup:
 - The models, discriminator and generator in one file.
+EDIT: A file for all the operations/functions called ops.py.
 - Read data in one file.
 - Datasets in subfolder.
