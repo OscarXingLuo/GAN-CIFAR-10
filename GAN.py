@@ -154,7 +154,7 @@ def generator(z, batch_size, z_dim, settings, reuse = False):
 #__main__
 
 (X_training, Y_training, y_training, X_validation, Y_validation, y_validation,
-			X_test, Y_test, y_test) = CIFAR_10()
+			X_test, Y_test, y_test) = load_CIFAR_10()
 
 print("X_training")
 print(X_training.shape)
