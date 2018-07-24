@@ -48,7 +48,8 @@ def discriminator(input_image, settings, dataset, reuse = False):
 	with tf.variable_scope('discriminator') as scope:
 		if (reuse):
 			tf.get_variable_scope().reuse_variables()
-		if dataset == 'CIFAR-10':
+
+		if settings['Model'] == 'Simple':
 			#simple
 			h_conv1 = leakyrelu(conv2d(input_image, '1',settings, 2, type_name='d'),'first_layer')
 			print(h_conv1)
@@ -56,62 +57,63 @@ def discriminator(input_image, settings, dataset, reuse = False):
 			print(h_conv2)
 			h_conv3 = leakyrelu(conv2d(h_conv2, '3',settings, 2, type_name='d'),'third_layer')
 			print(h_conv3)
-			#max_pooling = tf.nn.max_pool(h_conv2, settings['pool_ksize'], settings['pool_stride'], padding = "SAME")
+			max_pooling = tf.nn.max_pool(h_conv2, settings['pool_ksize'], settings['pool_stride'], padding = "SAME")
 			flat = tf.reshape(h_conv3, [settings['batch_size'],-1])
 			print(flat)
 			final = leakyrelu(fclayer(flat,'4',settings, type_name='d'),'last_layer')
 			print(final)
-			#Complex
-			#h_conv1 = tf.contrib.layers.batch_norm(conv2d(input_image, '1', settings, 1, type_name='d'), 
-			#	center = True, scale = True, is_training = True, scope = "d_bn1")
-			#h_1 = leakyrelu(h_conv1, 'layer1')
-			#print(h_1)
-			#h_1 = avg_pool_2x2(h_conv1)
-			#h_conv2 = tf.contrib.layers.batch_norm(conv2d(h_1, '2', settings, 1, type_name='d'), 
-			#	center = True, scale = True, is_training = True, scope = "d_bn2")
-			#h_2 = leakyrelu(h_conv2, 'layer2')
-			#print(h_2)
-
-			#h_conv3 = tf.contrib.layers.batch_norm(conv2d(h_2, '3', settings, 2, type_name='d'), 
-			#	center = True, scale = True, is_training = True, scope = "d_bn3")
-			#h_3 = leakyrelu(h_conv3, 'layer3')
-			#print(h_3)
-
-			#drop_out1 = tf.nn.dropout(h_3, settings['keep_prob'])
-			#h_conv4 = tf.contrib.layers.batch_norm(conv2d(drop_out1, '4', settings, 1, type_name='d'), 
-			#	center = True, scale = True, is_training = True, scope = "d_bn4")
-			#h_4 = leakyrelu(h_conv4, 'layer4')
-			#print(h_4)
-
-			#h_conv5 = tf.contrib.layers.batch_norm(conv2d(h_4, '5', settings, 1, type_name='d'),
-			#	center = True, scale = True, is_training = True, scope = "d_bn5")
-			#h_5 = leakyrelu(h_conv5, 'layer5')
-			#print(h_5)
-
-			#h_conv6 = tf.contrib.layers.batch_norm(conv2d(h_5, '6', settings, 2, type_name='d'),
-			#	center = True, scale = True, is_training = True, scope = "d_bn6")
-			#h_6 = leakyrelu(h_conv6, 'layer6')
-			#print(h_6)
-
-			#drop_out2 = tf.nn.dropout(h_6, settings['keep_prob'])
-			#h_conv7 = tf.contrib.layers.batch_norm(conv2d(drop_out2, '7', settings, 1, type_name='d'),
-			#	center = True, scale = True, is_training = True, scope = "d_bn7")
-			#h_7 = leakyrelu(h_conv7, 'layer7')
-			#print(h_7)
-
-			#avg_pool = avg_pool_2x2(h_7)
-			#flatten = tf.layers.flatten(avg_pool)
-			#fc1 = tf.contrib.layers.batch_norm(fclayer(flatten, '8', settings, type_name = 'd'),
-			#	center = True, scale = True, is_training = True, scope = "d_bn8")
-			#h_8 = leakyrelu(fc1, 'layer8')
-			#print(h_8)
-
-			#fc2 = tf.contrib.layers.batch_norm(fclayer(h_8, '9', settings, type_name = 'd'),
-			#	center = True, scale = True, is_training = True, scope = "d_bn9")
-			#h_9 = leakyrelu(fc2, 'layer9')
-			#print(h_9)
-
 			return final
+		if settings['Model'] == 'Complex':
+			
+			#Complex
+			h_conv1 = tf.contrib.layers.batch_norm(conv2d(input_image, '1', settings, 1, type_name='d'), 
+				center = True, scale = True, is_training = True, scope = "d_bn1")
+			h_1 = leakyrelu(h_conv1, 'layer1')
+			print(h_1)
+			h_1 = avg_pool_2x2(h_conv1)
+			h_conv2 = tf.contrib.layers.batch_norm(conv2d(h_1, '2', settings, 1, type_name='d'), 
+				center = True, scale = True, is_training = True, scope = "d_bn2")
+			h_2 = leakyrelu(h_conv2, 'layer2')
+			print(h_2)
+			h_conv3 = tf.contrib.layers.batch_norm(conv2d(h_2, '3', settings, 2, type_name='d'), 
+				center = True, scale = True, is_training = True, scope = "d_bn3")
+			h_3 = leakyrelu(h_conv3, 'layer3')
+			print(h_3)
+
+			drop_out1 = tf.nn.dropout(h_3, settings['keep_prob'])
+			h_conv4 = tf.contrib.layers.batch_norm(conv2d(drop_out1, '4', settings, 1, type_name='d'), 
+				center = True, scale = True, is_training = True, scope = "d_bn4")
+			h_4 = leakyrelu(h_conv4, 'layer4')
+			print(h_4)
+
+			h_conv5 = tf.contrib.layers.batch_norm(conv2d(h_4, '5', settings, 1, type_name='d'),
+				center = True, scale = True, is_training = True, scope = "d_bn5")
+			h_5 = leakyrelu(h_conv5, 'layer5')
+			print(h_5)
+
+			h_conv6 = tf.contrib.layers.batch_norm(conv2d(h_5, '6', settings, 2, type_name='d'),
+				center = True, scale = True, is_training = True, scope = "d_bn6")
+			h_6 = leakyrelu(h_conv6, 'layer6')
+			print(h_6)
+
+			drop_out2 = tf.nn.dropout(h_6, settings['keep_prob'])
+			h_conv7 = tf.contrib.layers.batch_norm(conv2d(drop_out2, '7', settings, 1, type_name='d'),
+				center = True, scale = True, is_training = True, scope = "d_bn7")
+			h_7 = leakyrelu(h_conv7, 'layer7')
+			print(h_7)
+
+			flatten = tf.layers.flatten(h_7)
+			fc1 = tf.contrib.layers.batch_norm(fclayer(flatten, '8', settings, type_name = 'd'),
+				center = True, scale = True, is_training = True, scope = "d_bn8")
+			h_8 = leakyrelu(fc1, 'layer8')
+			print(h_8)
+
+			fc2 = tf.contrib.layers.batch_norm(fclayer(h_8, '9', settings, type_name = 'd'),
+				center = True, scale = True, is_training = True, scope = "d_bn9")
+			h_9 = leakyrelu(fc2, 'layer9')
+			print(h_9)
+
+			return h_9	
 
 
 def generator(z, batch_size, z_dim, settings, reuse = False):
@@ -154,24 +156,57 @@ def generator(z, batch_size, z_dim, settings, reuse = False):
 (X_training, Y_training, y_training, X_validation, Y_validation, y_validation,
 			X_test, Y_test, y_test) = CIFAR_10()
 
+print("X_training")
+print(X_training.shape)
+print("Y_training")
+print(Y_training.shape)
+print("y_training")
+print(y_training.shape)
+print("X_validation")
+print(X_validation.shape)
+print("Y_validation")
+print(Y_validation.shape)
+print("y_validation")
+print(y_validation.shape)
+print("X_test")
+print(X_test.shape)
+print("Y_test")
+print(Y_test.shape)
+print("y_test")
+print(y_test.shape)
+
 batch_size = 64
 
-d_settings = {
-	
-	'd_wconv1': [5,5,3,64],
-	'd_wconv2': [5,5,64,128],
-	'd_wconv3': [5,5,128,256],
-	'd_wconv4': [5,5,32,64],
-	'd_wconv5': [5,5,64,128],
-	'd_wconv6': [5,5,128,256],
-	'd_wconv7': [5,5,256,512],
+d_settings_Simple = {
+	'Model': 'Simple',
+	'd_wconv1': [5,5,3,32],
+	'd_wconv2': [5,5,32,64],
+	'd_wconv3': [5,5,64,128],
+	'batch_size': batch_size,
+	'keep_prob': 0.75,
+	'pool_ksize': [1,2,2,1],
+	'pool_stride': [1,1,1,1],
+	'd_wfc4': [4*4*128,1],
+
+}
+
+
+d_settings_Complex = {
+	'Model': 'Complex',
+	'd_wconv1': [5,5,3,32],
+	'd_wconv2': [5,5,32,64],
+	'd_wconv3': [5,5,64,128],
+	'd_wconv4': [5,5,128,256],
+	'd_wconv5': [5,5,256,512],
+	'd_wconv6': [5,5,512,1024],
+	'd_wconv7': [5,5,1024,2048],
 	'batch_size': batch_size,
 	'keep_prob': 0.75,
 	'pool_ksize': [1,2,2,1],
 	'pool_stride': [1,1,1,1],
 	'd_wfc3': [16*16*16,32],	
 	'd_wfc4': [4*4*256,1],
-	'd_wfc8':[8192,32],
+	'd_wfc8':[32768,32],
 	'd_wfc9': [32,1]
 }
 
@@ -194,9 +229,9 @@ x_placeholder=tf.placeholder("float", shape=[None, 32,32,3])
 z_dimensions = 100
 z_placeholder = tf.placeholder("float", shape=[None,z_dimensions])
 
-Dx = discriminator(x_placeholder, d_settings, dataset='CIFAR-10')
+Dx = discriminator(x_placeholder, d_settings_Simple, dataset='CIFAR-10')
 Gz = generator(z_placeholder, batch_size, z_dimensions, g_settings)
-Dg = discriminator(Gz, d_settings, dataset = 'CIFAR-10', reuse = 'True')
+Dg = discriminator(Gz, d_settings_Simple, dataset = 'CIFAR-10',reuse = 'True')
 
 g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = Dg, labels = tf.ones_like(Dg)))
 d_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = Dx, labels = tf.zeros_like(Dx))) + \
@@ -212,7 +247,7 @@ trainerG = adam.minimize(g_loss, var_list=g_vars)
 
 init = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 sess.run(init)
-iterations = 10000
+iterations = 100000
 dLoss_list = []
 gLoss_list = []
 for i in range(iterations):
@@ -225,11 +260,12 @@ for i in range(iterations):
 	_,gLoss = sess.run([trainerG,g_loss], feed_dict={z_placeholder:z_batch})
 	gLoss_list.append(gLoss)
 	if i%250==0:
-		sample_image = generator(z_placeholder, 1, z_dimensions,g_settings, reuse = True)
-		z_batch = np.random.normal(-1, 1, size=[1, z_dimensions])
+		sample_image = generator(z_placeholder, 10, z_dimensions,g_settings, reuse = True)
+		z_batch = np.random.normal(-1, 1, size=[10, z_dimensions])
 		temp = (sess.run(sample_image, feed_dict={z_placeholder: z_batch}))
-		my_i = temp.squeeze()
-		save(my_i,str(i))
+		for idx,img in enumerate(temp):
+			my_i = img.squeeze()
+			save(my_i,str(i)+str(idx))
 
 #x = np.arange(0,iterations,1)
 #plt.plot(x,dLoss_list, x,gLoss_list)
