@@ -56,7 +56,7 @@ def CIFAR_10():
 
 	X_validation = np.array(ds5[b'data'])
 	X_validation = np.array(X_validation,dtype = float)
-	X_validation = np.transpose(np.reshape(X_validation, [10000, 32,32,3]),(0,2,3,1))/255
+	X_validation = np.transpose(np.reshape(X_validation, [10000, 3, 32,32]),(0,2,3,1))/255
 
 	Y_validation = np.array(ds5[b'labels'])
 	Y_validation = np.array(Y_validation,dtype = float)
@@ -64,7 +64,7 @@ def CIFAR_10():
 
 	X_test = np.array(ds6[b'data'])
 	X_test = np.array(X_test, dtype=float)
-	X_test = np.transpose(np.reshape(X_validation, [10000,32,32,3]),(0,2,3,1))/255
+	X_test = np.transpose(np.reshape(X_validation, [10000, 3, 32, 32]),(0,2,3,1))/255
 
 	Y_test = np.array(ds6[b'labels'])
 	Y_test = np.array(Y_test, dtype=float)
