@@ -196,8 +196,9 @@ Gz = generator(z_placeholder, batch_size, z_dimensions, g_settings)
 Dg = discriminator(Gz, d_settings_Simple, dataset = 'CIFAR-10',reuse = 'True')
 
 g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = Dg, labels = tf.ones_like(Dg)))
-d_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = Dx, labels = tf.zeros_like(Dx))) + \
-tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = Dg, labels = tf.zeros_like(Dg)))
+d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = Dx, labels = tf.ones_like(Dx)))
+d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits = Dg, labels = tf.zeros_like(Dg)))
+d_loss = d_loss_real+d_loss_fake
 
 tvars = tf.trainable_variables()
 d_vars = [var for var in tvars if 'd_' in var.name]
@@ -209,18 +210,20 @@ trainerG = adam.minimize(g_loss, var_list=g_vars)
 
 init = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 sess.run(init)
-iterations = 1000
+iterations = 100
 dLoss_list = []
 gLoss_list = []
 for i in range(iterations):
 	X_batch = batching(X_training, batch_size)
 	z_batch = np.random.normal(-1, 1, size=[batch_size, z_dimensions])
 	dLoss = sess.run(d_loss, feed_dict={z_placeholder: z_batch, x_placeholder: X_batch})
-	dLoss_list.append(dLoss)
+	if i%(iterations/10)==0:
+		dLoss_list.append(dLoss)
 	if dLoss > 1:
 		sess.run(trainerD, feed_dict={z_placeholder: z_batch, x_placeholder: X_batch})
 	gLoss = sess.run(g_loss, feed_dict={z_placeholder:z_batch})
-	gLoss_list.append(gLoss)
+	if i%(iterations/10)==0:
+		gLoss_list.append(gLoss)
 
 	if gLoss > 1:
 		sess.run(trainerG, feed_dict={z_placeholder:z_batch})
@@ -236,7 +239,7 @@ xlist = np.arange(iterations)
 
 plt.plot(xlist, dLoss_list, 'b')
 plt.plot(xlist, gLoss_list, 'r')
-plt.show()
+plt.savefig("Loss plot")
 
 #x = np.arange(0,iterations,1)
 #plt.plot(x,dLoss_list, x,gLoss_list)
