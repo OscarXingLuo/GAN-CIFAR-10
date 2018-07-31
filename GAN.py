@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import random
 from Load_data import *
-
+from ops import *
 
 
 def discriminator(input_image, settings, dataset, reuse = False):
@@ -20,7 +20,6 @@ def discriminator(input_image, settings, dataset, reuse = False):
 			print(h_conv2)
 			h_conv3 = leakyrelu(conv2d(h_conv2, '3',settings, 2, type_name='d'),'third_layer')
 			print(h_conv3)
-			max_pooling = tf.nn.max_pool(h_conv2, settings['pool_ksize'], settings['pool_stride'], padding = "SAME")
 			flat = tf.reshape(h_conv3, [settings['batch_size'],-1])
 			print(flat)
 			final = leakyrelu(fclayer(flat,'4',settings, type_name='d'),'last_layer')
@@ -204,31 +203,40 @@ tvars = tf.trainable_variables()
 d_vars = [var for var in tvars if 'd_' in var.name]
 g_vars = [var for var in tvars if 'g_' in var.name]
 
-adam = tf.train.AdamOptimizer(learning_rate = 0.0002, beta1 = 0.5)
+adam = tf.train.AdamOptimizer()
 trainerD = adam.minimize(d_loss, var_list=d_vars)
 trainerG = adam.minimize(g_loss, var_list=g_vars)
 
 init = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
 sess.run(init)
-iterations = 100000
+iterations = 1000
 dLoss_list = []
 gLoss_list = []
 for i in range(iterations):
-	print(i)
-	X_batch, Y_batch = batching(X_training,Y_training, batch_size)
+	X_batch = batching(X_training, batch_size)
 	z_batch = np.random.normal(-1, 1, size=[batch_size, z_dimensions])
-	if i%2==0:
-		_,dLoss = sess.run([trainerD,d_loss], feed_dict={z_placeholder: z_batch, x_placeholder: X_batch})
-		dLoss_list.append(dLoss)
-	_,gLoss = sess.run([trainerG,g_loss], feed_dict={z_placeholder:z_batch})
+	dLoss = sess.run(d_loss, feed_dict={z_placeholder: z_batch, x_placeholder: X_batch})
+	dLoss_list.append(dLoss)
+	if dLoss > 1:
+		sess.run(trainerD, feed_dict={z_placeholder: z_batch, x_placeholder: X_batch})
+	gLoss = sess.run(g_loss, feed_dict={z_placeholder:z_batch})
 	gLoss_list.append(gLoss)
-	if i%250==0:
-		sample_image = generator(z_placeholder, 10, z_dimensions,g_settings, reuse = True)
-		z_batch = np.random.normal(-1, 1, size=[10, z_dimensions])
-		temp = (sess.run(sample_image, feed_dict={z_placeholder: z_batch}))
-		for idx,img in enumerate(temp):
-			my_i = img.squeeze()
-			save(my_i,str(i)+str(idx))
+
+	if gLoss > 1:
+		sess.run(trainerG, feed_dict={z_placeholder:z_batch})
+
+	#if i%int(iterations/5)==0:
+	#	sample_image = generator(z_placeholder, 10, z_dimensions,g_settings, reuse = True)
+	#	z_batch = np.random.normal(-1, 1, size=[10, z_dimensions])
+	#	temp = (sess.run(sample_image, feed_dict={z_placeholder: z_batch}))
+	#	for idx,img in enumerate(temp):
+	#		my_i = img.squeeze()
+	#		save(my_i,str(i)+str(idx))
+xlist = np.arange(iterations)
+
+plt.plot(xlist, dLoss_list, 'b')
+plt.plot(xlist, gLoss_list, 'r')
+plt.show()
 
 #x = np.arange(0,iterations,1)
 #plt.plot(x,dLoss_list, x,gLoss_list)
